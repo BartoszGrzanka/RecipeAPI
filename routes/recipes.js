@@ -19,11 +19,11 @@ router.use((req, res, next) => {
 
 // GET All Recipes
 router.get('/recipes', (req, res) => {
-    const translate = req.query.tr === 'true'; // Jeśli tr=true, przekształcamy ID składników w obiekty
+    const translate = req.query.tr === 'true'
 
     const recipesWithIngredients = recipes.map(recipe => ({
         ...recipe,
-        ingredients: mapIngredients(recipe.ingredients, translate,ingredients), // Mapujemy składniki
+        ingredients: mapIngredients(recipe.ingredients, translate,ingredients),
         links: [
             { rel: 'self', method: 'GET', href: `/api/recipes/${recipe.id}` },
             { rel: 'update', method: 'PUT', href: `/api/recipes/${recipe.id}` },
@@ -37,7 +37,7 @@ router.get('/recipes', (req, res) => {
 
 // GET Single Recipe
 router.get('/recipes/:id', (req, res) => {
-    const recipeIndex = Number(req.params.id) - 1 // Jeśli ID w żądaniu to np. 1, zróbmy to 0-indeksowane
+    const recipeIndex = Number(req.params.id) - 1
     const recipe = recipes[recipeIndex]
 
     if (!recipe) {
