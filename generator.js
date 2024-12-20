@@ -21,9 +21,9 @@ const generateNutrition = (index) => {
   }
 }
 
-const generateRecipe = () => {
+const generateRecipe = (index) => {
   return {
-    id: faker.string.uuid(),
+    id: index+1,
     name: faker.commerce.productName(),
     description: faker.lorem.paragraph(),
     //ingredients: Array.from({ length: 5 }, generateIngredient),
@@ -35,7 +35,7 @@ const generateRecipe = () => {
 }
 
 export const generatedRecipes = (count = 50) => {
-  return Array.from({ length: count }, generateRecipe);
+  return Array.from({ length: count }, (_, index) => generateRecipe(index));
 }
 
 export const generatedIngredients = (count = 100) => {
