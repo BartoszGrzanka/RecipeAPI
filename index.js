@@ -3,8 +3,11 @@ import cors from 'cors'
 import recipesRoutes from './routes/recipes.js'
 
 import { ApolloServer } from 'apollo-server-express'
-import typeDefs from './schemas/schemas.js'
+import typeDefs from './schemas/schemasQL.js'
 import resolvers from './resolvers/resolvers.js'
+
+import mongoose from 'mongoose'
+
 
 const app = express()
 
@@ -26,6 +29,16 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }
 
+const connectDB = async () => {
+  try {
+    await mongoose.connect('mongodb://127.0.0.1:27017/recipeAPI')
+    console.log('Connected to MongoDB')
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error)
+    process.exit(1)
+  }
+}
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -37,6 +50,8 @@ server.applyMiddleware({ app, path: '/graphql' })
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use('/api', recipesRoutes)
+
+await connectDB()
 app.listen(8989, () => {
   console.log("Started on 8989")
 })
