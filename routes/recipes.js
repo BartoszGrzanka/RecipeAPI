@@ -18,6 +18,61 @@ router.use((req, res, next) => {
 //---------------------------------------------------------
 // -------------------- Recipes Routes --------------------
 //---------------------------------------------------------
+/**
+ * @swagger
+ * tags:
+ *   name: Recipes
+ *   description: Endpoints for managing recipes
+ */
+/**
+ * @swagger
+ * /api/recipes:
+ *   get:
+ *     summary: Retrieve a list of recipes
+ *     tags: [Recipes]
+ *     responses:
+ *       200:
+ *         description: A list of recipes with links
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     example: "63f8f8e129c029f8e8b8a8c8"
+ *                   name:
+ *                     type: string
+ *                     example: "Spaghetti Bolognese"
+ *                   description:
+ *                     type: string
+ *                     example: "A delicious Italian dish with rich tomato sauce"
+ *                   ingredients:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                     example: ["spaghetti", "tomato sauce", "ground beef"]
+ *                   links:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         rel:
+ *                           type: string
+ *                           example: "self"
+ *                         method:
+ *                           type: string
+ *                           example: "GET"
+ *                         href:
+ *                           type: string
+ *                           example: "/api/recipes/63f8f8e129c029f8e8b8a8c8"
+ *       404:
+ *         description: No recipes found
+ *       500:
+ *         description: Internal server error
+ */
 
 // GET All Recipes
 router.get('/recipes', async (req, res) => {
@@ -49,12 +104,95 @@ router.get('/recipes', async (req, res) => {
     }
 })
 
+/**
+ * @swagger
+ * /api/recipes/{_id}:
+ *   get:
+ *     summary: Get a recipe by ID
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Recipe ID
+ *         example: "63f60ae4567abcd123456789"
+ *     responses:
+ *       200:
+ *         description: Recipe fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                   example: "63f60ae4567abcd123456789"
+ *                 name:
+ *                   type: string
+ *                   example: "Spaghetti Bolognese"
+ *                 description:
+ *                   type: string
+ *                   example: "A delicious Italian dish with rich tomato sauce"
+ *                 ingredients:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["spaghetti", "tomato sauce", "ground beef"]
+ *                 instructions:
+ *                   type: string
+ *                   example: "Boil spaghetti, prepare sauce, mix together."
+ *                 cookingTime:
+ *                   type: integer
+ *                   example: 30
+ *                 category:
+ *                   type: string
+ *                   example: "Italian"
+ *                 links:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       rel:
+ *                         type: string
+ *                         example: "self"
+ *                       method:
+ *                         type: string
+ *                         example: "GET"
+ *                       href:
+ *                         type: string
+ *                         example: "/api/recipes/63f60ae4567abcd123456789"
+ *       404:
+ *         description: Recipe not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Recipe with _id 63f60ae4567abcd123456789 not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error fetching recipe"
+ *                 error:
+ *                   type: string
+ *                   example: "Recipe validation failed"
+ */
 
-// GET Single Recipe
-router.get('/recipes/:id', async (req, res) => {
+
+router.get('/recipes/:_id', async (req, res) => {
     try {
-        const { id } = req.params;
-        const recipe = await Recipe.findById(id)
+        const { _id } = req.params;
+        const recipe = await Recipe.findById(_id)
 
         if (recipe) {
             const recipeWithLinks = {
@@ -70,13 +208,57 @@ router.get('/recipes/:id', async (req, res) => {
 
             res.status(200).json(recipeWithLinks);
         } else {
-            res.status(404).json({ message: `Recipe with _id ${id} not found` });
+            res.status(404).json({ message: `Recipe with _id ${_id} not found` });
         }
     } catch (error) {
         console.error('Error fetching recipe:', error);
         res.status(500).json({ message: 'Error fetching recipe', error: error.message })
     }
 })
+/**
+ * @swagger
+ * /api/recipes:
+ *   post:
+ *     summary: Create a new recipe
+ *     tags: [Recipes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 example: "12345"
+ *               name:
+ *                 type: string
+ *                 example: "Spaghetti Bolognese"
+ *               description:
+ *                 type: string
+ *                 example: "A delicious Italian dish with rich tomato sauce"
+ *               ingredients:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["spaghetti", "tomato sauce", "ground beef"]
+ *               instructions:
+ *                 type: string
+ *                 example: "Boil spaghetti, prepare sauce, mix together."
+ *               cookingTime:
+ *                 type: integer
+ *                 example: 30
+ *               category:
+ *                 type: string
+ *                 example: "Italian"
+ *     responses:
+ *       201:
+ *         description: Recipe created successfully
+ *       400:
+ *         description: Validation error
+ *       500:
+ *         description: Internal server error
+ */
 
 // POST New Recipe
 router.post('/recipes', async (req, res) => {
@@ -113,6 +295,56 @@ router.post('/recipes', async (req, res) => {
         res.status(500).json({ message: 'Error creating recipe', error: error.message })
     }
 })
+/**
+ * @swagger
+ * /api/recipes/{_id}:
+ *   put:
+ *     summary: Replace an existing recipe
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Recipe ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Spaghetti Bolognese"
+ *               description:
+ *                 type: string
+ *                 example: "A delicious Italian dish with rich tomato sauce"
+ *               ingredients:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["spaghetti", "tomato sauce", "ground beef"]
+ *               instructions:
+ *                 type: string
+ *                 example: "Boil spaghetti, prepare sauce, mix together."
+ *               cookingTime:
+ *                 type: integer
+ *                 example: 30
+ *               category:
+ *                 type: string
+ *                 example: "Italian"
+ *     responses:
+ *       200:
+ *         description: Recipe updated successfully
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Recipe not found
+ *       500:
+ *         description: Internal server error
+ */
 
 // PUT Recipe
 router.put('/recipes/:_id', async (req, res) => {
@@ -162,6 +394,56 @@ router.put('/recipes/:_id', async (req, res) => {
 })
 
 
+/**
+ * @swagger
+ * /api/recipes/{_id}:
+ *   patch:
+ *     summary: Partially update an existing recipe
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Recipe ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Spaghetti Bolognese"
+ *               description:
+ *                 type: string
+ *                 example: "A delicious Italian dish with rich tomato sauce"
+ *               ingredients:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["spaghetti", "tomato sauce", "ground beef"]
+ *               instructions:
+ *                 type: string
+ *                 example: "Boil spaghetti, prepare sauce, mix together."
+ *               cookingTime:
+ *                 type: integer
+ *                 example: 30
+ *               category:
+ *                 type: string
+ *                 example: "Italian"
+ *     responses:
+ *       200:
+ *         description: Recipe updated successfully
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Recipe not found
+ *       500:
+ *         description: Internal server error
+ */
 
 // PATCH Recipe
 router.patch('/recipes/:_id', async (req, res) => {
@@ -211,6 +493,27 @@ router.patch('/recipes/:_id', async (req, res) => {
     }
 })
 
+/**
+ * @swagger
+ * /api/recipes/{_id}:
+ *   delete:
+ *     summary: Delete a recipe by ID
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Recipe ID
+ *     responses:
+ *       200:
+ *         description: Recipe deleted successfully
+ *       404:
+ *         description: Recipe not found
+ *       500:
+ *         description: Internal server error
+ */
 
 // DELETE Recipe
 router.delete('/recipes/:_id', async (req, res) => {
@@ -238,6 +541,61 @@ router.delete('/recipes/:_id', async (req, res) => {
 // -------------------- Ingredients Routes --------------------
 //-------------------------------------------------------------
 
+/**
+ * @swagger
+ * /api/ingredients:
+ *   get:
+ *     summary: Get all ingredients
+ *     tags: [Ingredients]
+ *     responses:
+ *       200:
+ *         description: List of ingredients fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   quantity:
+ *                     type: number
+ *                   unit:
+ *                     type: string
+ *                   recipes:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                   nutrition:
+ *                     type: object
+ *                     properties:
+ *                       calories:
+ *                         type: number
+ *                       protein:
+ *                         type: number
+ *                       fat:
+ *                         type: number
+ *                       carbs:
+ *                         type: number
+ *                   links:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         rel:
+ *                           type: string
+ *                         method:
+ *                           type: string
+ *                         href:
+ *                           type: string
+ *       404:
+ *         description: No ingredients found
+ *       500:
+ *         description: Internal server error
+ */
 
 // GET All Ingredients
 router.get('/ingredients', async (req, res) => {
@@ -269,12 +627,103 @@ router.get('/ingredients', async (req, res) => {
     }
 })
 
-
+/**
+ * @swagger
+ * /api/ingredients/{_id}:
+ *   get:
+ *     summary: Get a single ingredient by ID
+ *     tags: [Ingredients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the ingredient
+ *         example: "63f60ae4567abcd123456789"
+ *     responses:
+ *       200:
+ *         description: Ingredient fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                   example: "63f60ae4567abcd123456789"
+ *                 name:
+ *                   type: string
+ *                   example: "Tomato"
+ *                 quantity:
+ *                   type: number
+ *                   example: 5
+ *                 unit:
+ *                   type: string
+ *                   example: "kg"
+ *                 recipes:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["63f8f8e129c029f8e8b8a8c8", "63f8f8e129c029f8e8b8a8d9"]
+ *                 nutrition:
+ *                   type: object
+ *                   properties:
+ *                     calories:
+ *                       type: number
+ *                       example: 20
+ *                     protein:
+ *                       type: number
+ *                       example: 1.5
+ *                     fat:
+ *                       type: number
+ *                       example: 0.2
+ *                     carbs:
+ *                       type: number
+ *                       example: 4.0
+ *                 links:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       rel:
+ *                         type: string
+ *                         example: "self"
+ *                       method:
+ *                         type: string
+ *                         example: "GET"
+ *                       href:
+ *                         type: string
+ *                         example: "/api/ingredients/63f60ae4567abcd123456789"
+ *       404:
+ *         description: Ingredient not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Ingredient with ID 63f60ae4567abcd123456789 not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error fetching ingredient"
+ *                 error:
+ *                   type: string
+ *                   example: "Error message here"
+ */
 // GET Single Ingredient
-router.get('/ingredients/:id', async (req, res) => {
+router.get('/ingredients/:_id', async (req, res) => {
     try {
-        const { id } = req.params
-        const ingredient = await Ingredient.findById(id)
+        const { _id } = req.params
+        const ingredient = await Ingredient.findById(_id)
 
         if (ingredient) {
             const ingredientWithLinks = {
@@ -290,7 +739,7 @@ router.get('/ingredients/:id', async (req, res) => {
 
             res.status(200).json(ingredientWithLinks)
         } else {
-            res.status(404).json({ message: `Ingredient with _id ${id} not found` })
+            res.status(404).json({ message: `Ingredient with _id ${_id} not found` })
         }
     } catch (error) {
         console.error('Error fetching ingredient:', error)
@@ -298,6 +747,51 @@ router.get('/ingredients/:id', async (req, res) => {
     }
 })
 
+/**
+ * @swagger
+ * /api/ingredients:
+ *   post:
+ *     summary: Add a new ingredient
+ *     tags: [Ingredients]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Tomato"
+ *               quantity:
+ *                 type: number
+ *                 example: 2
+ *               unit:
+ *                 type: string
+ *                 example: "kg"
+ *               recipes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               nutrition:
+ *                 type: object
+ *                 properties:
+ *                   calories:
+ *                     type: number
+ *                   protein:
+ *                     type: number
+ *                   fat:
+ *                     type: number
+ *                   carbs:
+ *                     type: number
+ *     responses:
+ *       201:
+ *         description: Ingredient created successfully
+ *       400:
+ *         description: Validation error
+ *       500:
+ *         description: Internal server error
+ */
 
 // POST New Ingredient
 router.post('/ingredients', async (req, res) => {
@@ -332,6 +826,48 @@ router.post('/ingredients', async (req, res) => {
         res.status(500).json({ message: 'Error creating ingredient', error: error.message })
     }
 })
+/**
+ * @swagger
+ * /api/ingredients/{_id}:
+ *   put:
+ *     summary: Replace an ingredient by ID
+ *     tags: [Ingredients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the ingredient
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ *               unit:
+ *                 type: string
+ *               recipes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               nutrition:
+ *                 type: object
+ *     responses:
+ *       201:
+ *         description: Ingredient replaced successfully
+ *       404:
+ *         description: Ingredient not found
+ *       400:
+ *         description: Validation error
+ *       500:
+ *         description: Internal server error
+ */
 
 // PUT Ingredient
 router.put('/ingredients/:_id', async (req, res) => {
@@ -380,6 +916,48 @@ router.put('/ingredients/:_id', async (req, res) => {
     }
 })
 
+/**
+ * @swagger
+ * /api/ingredients/{_id}:
+ *   patch:
+ *     summary: Partially update an ingredient by ID
+ *     tags: [Ingredients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the ingredient
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ *               unit:
+ *                 type: string
+ *               recipes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               nutrition:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Ingredient updated successfully
+ *       404:
+ *         description: Ingredient not found
+ *       400:
+ *         description: Validation error
+ *       500:
+ *         description: Internal server error
+ */
 
 // PATCH Ingredient (Partial update)
 router.patch('/ingredients/:_id', async (req, res) => {
@@ -430,6 +1008,27 @@ router.patch('/ingredients/:_id', async (req, res) => {
         res.status(500).json({ message: 'Error updating ingredient', error: error.message })
     }
 })
+/**
+ * @swagger
+ * /api/ingredients/{_id}:
+ *   delete:
+ *     summary: Delete an ingredient by ID
+ *     tags: [Ingredients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the ingredient
+ *     responses:
+ *       200:
+ *         description: Ingredient deleted successfully
+ *       404:
+ *         description: Ingredient not found
+ *       500:
+ *         description: Internal server error
+ */
 
 // DELETE Ingredient
 router.delete('/ingredients/:_id', async (req, res) => {
@@ -461,7 +1060,47 @@ router.delete('/ingredients/:_id', async (req, res) => {
 // -------------------- Nutritions Routes --------------------
 //------------------------------------------------------------
 
-
+/**
+ * @swagger
+ * /nutritions:
+ *   get:
+ *     summary: Get all nutrition records
+ *     tags:
+ *       - Nutritions
+ *     responses:
+ *       200:
+ *         description: A list of all nutrition records
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               _id:
+ *                 type: string
+ *               id:
+ *                 type: string
+ *               calories:
+ *                 type: integer
+ *               protein:
+ *                 type: integer
+ *               fat:
+ *                 type: integer
+ *               carbohydrates:
+ *                 type: integer
+ *               links:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     rel:
+ *                       type: string
+ *                     method:
+ *                       type: string
+ *                     href:
+ *                       type: string
+ *       404:
+ *         description: No nutrition records found
+ */
 // GET All Nutritions
 router.get('/nutritions', async (req, res) => {
     try {
@@ -491,7 +1130,51 @@ router.get('/nutritions', async (req, res) => {
         res.status(500).json({ message: 'Error fetching nutritions', error: error.message })
     }
 })
-
+/**
+ * @swagger
+ * /nutritions/{_id}:
+ *   get:
+ *     summary: Get a single nutrition record
+ *     tags:
+ *       - Nutritions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         type: string
+ *         required: true
+ *         description: The ID of the nutrition record to retrieve
+ *     responses:
+ *       200:
+ *         description: A single nutrition record
+ *         schema:
+ *           type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *             id:
+ *               type: string
+ *             calories:
+ *               type: integer
+ *             protein:
+ *               type: integer
+ *             fat:
+ *               type: integer
+ *             carbohydrates:
+ *               type: integer
+ *             links:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   rel:
+ *                     type: string
+ *                   method:
+ *                     type: string
+ *                   href:
+ *                     type: string
+ *       404:
+ *         description: Nutrition record not found
+ */
 // GET Single Nutrition
 router.get('/nutritions/:id', async (req, res) => {
     try {
@@ -518,7 +1201,70 @@ router.get('/nutritions/:id', async (req, res) => {
         res.status(500).json({ message: 'Error fetching nutrition', error: error.message })
     }
 })
-
+/**
+ * @swagger
+ * /nutritions:
+ *   post:
+ *     summary: Create a new nutrition record
+ *     tags:
+ *       - Nutritions
+ *     parameters:
+ *       - in: body
+ *         name: body
+ *         description: The nutrition object that needs to be created
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - calories
+ *             - protein
+ *             - fat
+ *             - carbohydrates
+ *           properties:
+ *             id:
+ *               type: string
+ *             calories:
+ *               type: integer
+ *             protein:
+ *               type: integer
+ *             fat:
+ *               type: integer
+ *             carbohydrates:
+ *               type: integer
+ *     responses:
+ *       201:
+ *         description: Successfully created nutrition
+ *         schema:
+ *           type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *             id:
+ *               type: string
+ *             calories:
+ *               type: integer
+ *             protein:
+ *               type: integer
+ *             fat:
+ *               type: integer
+ *             carbohydrates:
+ *               type: integer
+ *             links:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   rel:
+ *                     type: string
+ *                   method:
+ *                     type: string
+ *                   href:
+ *                     type: string
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Server error
+ */
 // POST Nutrition
 router.post('/nutritions', async (req, res) => {
     const { id, calories, protein, fat, carbohydrates } = req.body
@@ -552,7 +1298,75 @@ router.post('/nutritions', async (req, res) => {
         res.status(500).json({ message: 'Error creating nutrition', error: error.message })
     }
 })
-
+/**
+ * @swagger
+ * /nutritions/{_id}:
+ *   put:
+ *     summary: Update a nutrition record entirely
+ *     tags:
+ *       - Nutritions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         type: string
+ *         required: true
+ *         description: The ID of the nutrition record to update
+ *       - in: body
+ *         name: body
+ *         description: The nutrition fields to update
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - calories
+ *             - protein
+ *             - fat
+ *             - carbohydrates
+ *           properties:
+ *             calories:
+ *               type: integer
+ *             protein:
+ *               type: integer
+ *             fat:
+ *               type: integer
+ *             carbohydrates:
+ *               type: integer
+ *     responses:
+ *       200:
+ *         description: Successfully updated nutrition
+ *         schema:
+ *           type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *             id:
+ *               type: string
+ *             calories:
+ *               type: integer
+ *             protein:
+ *               type: integer
+ *             fat:
+ *               type: integer
+ *             carbohydrates:
+ *               type: integer
+ *             links:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   rel:
+ *                     type: string
+ *                   method:
+ *                     type: string
+ *                   href:
+ *                     type: string
+ *       400:
+ *         description: Missing required fields
+ *       404:
+ *         description: Nutrition not found
+ *       500:
+ *         description: Server error
+ */
 // PUT Nutrition
 router.put('/nutritions/:_id', async (req, res) => {
     const { id, calories, protein, fat, carbohydrates } = req.body
@@ -598,7 +1412,67 @@ router.put('/nutritions/:_id', async (req, res) => {
     }
 })
 
-
+/**
+ * @swagger
+ * /nutritions/{_id}:
+ *   patch:
+ *     summary: Update a nutrition record partially
+ *     tags:
+ *       - Nutritions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         type: string
+ *         required: true
+ *         description: The ID of the nutrition record to update
+ *       - in: body
+ *         name: body
+ *         description: The nutrition fields to update
+ *         schema:
+ *           type: object
+ *           properties:
+ *             calories:
+ *               type: integer
+ *             protein:
+ *               type: integer
+ *             fat:
+ *               type: integer
+ *             carbohydrates:
+ *               type: integer
+ *     responses:
+ *       200:
+ *         description: Successfully updated nutrition
+ *         schema:
+ *           type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *             id:
+ *               type: string
+ *             calories:
+ *               type: integer
+ *             protein:
+ *               type: integer
+ *             fat:
+ *               type: integer
+ *             carbohydrates:
+ *               type: integer
+ *             links:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   rel:
+ *                     type: string
+ *                   method:
+ *                     type: string
+ *                   href:
+ *                     type: string
+ *       400:
+ *         description: Invalid input
+ *       404:
+ *         description: Nutrition not found
+ */
 // PATCH Nutrition
 router.patch('/nutritions/:_id', async (req, res) => {
     const { _id } = req.params
@@ -649,6 +1523,44 @@ router.patch('/nutritions/:_id', async (req, res) => {
     }
 })
 
+
+/**
+ * @swagger
+ * /nutritions/{_id}:
+ *   delete:
+ *     summary: Delete a nutrition record
+ *     tags:
+ *       - Nutritions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         type: string
+ *         required: true
+ *         description: The ID of the nutrition record to delete
+ *     responses:
+ *       200:
+ *         description: Successfully deleted nutrition
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *             links:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   rel:
+ *                     type: string
+ *                   method:
+ *                     type: string
+ *                   href:
+ *                     type: string
+ *       404:
+ *         description: Nutrition not found
+ *       500:
+ *         description: Server error
+ */
 // DELETE Nutrition
 router.delete('/nutritions/:_id', async (req, res) => {
     const { _id } = req.params

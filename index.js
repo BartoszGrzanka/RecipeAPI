@@ -1,18 +1,17 @@
 import express from 'express'
 import cors from 'cors'
 import recipesRoutes from './routes/recipes.js'
-
 import { ApolloServer } from 'apollo-server-express'
 import typeDefs from './schemas/schemasQL.js'
 import resolvers from './resolvers/resolvers.js'
-
 import mongoose from 'mongoose'
 
+import swaggerUi from 'swagger-ui-express'
+import swaggerJsdoc from 'swagger-jsdoc'
 
 const app = express()
 
-const allowedOrigins = ['http://localhost:8989','http://localhost:3000']
-
+const allowedOrigins = ['http://localhost:8989','http://localhost:3000','http://localhost:3001']
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -39,6 +38,22 @@ const connectDB = async () => {
   }
 }
 
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Recipe API',
+      version: '1.0.0',
+      description: 'API for managing recipes and nutrition data',
+    },
+  },
+  apis: ['./routes/*.js'],
+}
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions)
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -53,5 +68,5 @@ app.use('/api', recipesRoutes)
 
 await connectDB()
 app.listen(8989, () => {
-  console.log("Started on 8989")
+  console.log("Started on http://localhost:8989")
 })
