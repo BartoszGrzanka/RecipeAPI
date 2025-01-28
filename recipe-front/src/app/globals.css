@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.menu {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1rem;
+}
+
+.menu button {
+  padding: 0.5rem 1rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.menu button:hover {
+  background-color: #45a049;
+}
