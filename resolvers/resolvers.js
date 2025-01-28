@@ -91,7 +91,7 @@ const resolvers = {
           // Paginacja
           let skip=0
             if(limit <= 0){
-              limit =await Recipe.countDocuments()
+              limit =await Nutrition.countDocuments()
             }else{
               skip = (page - 1) * limit
             }
@@ -221,7 +221,7 @@ const resolvers = {
         }
         let skip=0
           if(limit <= 0){
-            limit =await Recipe.countDocuments()
+            limit =await Ingredient.countDocuments()
           }else{
             skip = (page - 1) * limit
           }

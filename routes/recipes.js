@@ -79,46 +79,38 @@ router.get('/recipes/:id', async (req, res) => {
 })
 
 // POST New Recipe
-router.put('/recipes/:_id', async (req, res) => {
-    const { name, description, ingredients, instructions, cookingTime, category } = req.body
-    const { _id } = req.params
-    const updatedRecipe = {
+router.post('/recipes', async (req, res) => {
+    const { id, name, description, ingredients, instructions, cookingTime, category } = req.body
+    const newRecipe = new Recipe({
+        id,
         name,
         description,
         ingredients,
         instructions,
         cookingTime,
         category
-    }
+    })
 
     try {
-        const recipe = await Recipe.findById(_id)
+        const result = await newRecipe.save()
 
-        if (!recipe) {
-            return res.status(404).json({ error: 'Recipe not found' })
-        }
-        const result = await Recipe.findByIdAndUpdate(_id, updatedRecipe, { new: true, runValidators: true })
-        if (!result) {
-            return res.status(400).json({ error: 'Validation failed' })
-        }
-
-        res.status(200).json({
+        res.status(201).json({
             ...result.toObject(),
             links: [
                 { rel: 'self', method: 'GET', href: `/api/recipes/${result._id}` },
-                { rel: 'update', method: 'PATCH', href: `/api/recipes/${recipe._id}` },
-                { rel: 'replace', method: 'PUT', href: `/api/recipes/${recipe._id}` },
+                { rel: 'update', method: 'PATCH', href: `/api/recipes/${result._id}` },
+                { rel: 'replace', method: 'PUT', href: `/api/recipes/${result._id}` },
                 { rel: 'delete', method: 'DELETE', href: `/api/recipes/${result._id}` },
                 { rel: 'all', method: 'GET', href: '/api/recipes' }
             ]
         })
     } catch (error) {
-        console.error('Error updating recipe:', error)
+        console.error('Error creating recipe:', error)
         if (error.name === 'ValidationError') {
             const errorMessages = Object.values(error.errors).map(err => err.message)
             return res.status(400).json({ errors: errorMessages })
         }
-        res.status(500).json({ message: 'Error updating recipe', error: error.message })
+        res.status(500).json({ message: 'Error creating recipe', error: error.message })
     }
 })
 
@@ -345,33 +337,35 @@ router.post('/ingredients', async (req, res) => {
 router.put('/ingredients/:_id', async (req, res) => {
     const { recipes, name, quantity, unit, nutrition } = req.body
     const { _id } = req.params
-    if (  !name || !quantity || !unit || !nutrition ) {
-        return res.status(400).json({ error: 'Missing required fields. All fields except ID are required for PUT request.' })}
+
+    if (!name || !quantity || !unit || !nutrition) {
+        return res.status(400).json({ error: 'Missing required fields. All fields except ID are required for PUT request.' })
+    }
+
     try {
         const ingredient = await Ingredient.findById(_id)
 
         if (!ingredient) {
             return res.status(404).json({ error: 'Ingredient not found' })
         }
-        const updatedIngredient = {
-            recipes,
-            name,
-            quantity,
-            unit,
-            nutrition
-        }
 
+        const updatedIngredient = {
+            recipes,     
+            name,        
+            quantity,   
+            unit,        
+            nutrition  
+        }
         const result = await Ingredient.findByIdAndUpdate(_id, updatedIngredient, { new: true, runValidators: true })
-        
         if (!result) {
             return res.status(400).json({ error: 'Validation failed' })
         }
-        res.status(200).json({
+        res.status(201).json({
             ...result.toObject(),
             links: [
                 { rel: 'self', method: 'GET', href: `/api/ingredients/${result._id}` },
-                { rel: 'update', method: 'PATCH', href: `/api/ingredients/${newIngredient._id}` },
-                { rel: 'replace', method: 'PUT', href: `/api/ingredients/${newIngredient._id}` },
+                { rel: 'update', method: 'PATCH', href: `/api/ingredients/${result._id}` },
+                { rel: 'replace', method: 'PUT', href: `/api/ingredients/${result._id}` },
                 { rel: 'delete', method: 'DELETE', href: `/api/ingredients/${result._id}` },
                 { rel: 'all', method: 'GET', href: '/api/ingredients' }
             ]
@@ -385,6 +379,7 @@ router.put('/ingredients/:_id', async (req, res) => {
         res.status(500).json({ message: 'Error updating ingredient', error: error.message })
     }
 })
+
 
 // PATCH Ingredient (Partial update)
 router.patch('/ingredients/:_id', async (req, res) => {

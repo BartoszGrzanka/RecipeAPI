@@ -1,12 +1,21 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useMemo } from 'react'
 import { DataContext } from '@/contexts/APIContext'
 import IngredientDetails from './IngredientDetails'
+import IngredientFilter from './IngredientFilter'
 
 const IngredientList = () => {
   const { ingredients, loading, error } = useContext(DataContext)
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedIngredient, setSelectedIngredient] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+
   const pageSize = 5
+  //Fitracja
+  const filteredIngredients = useMemo(() => {
+    return ingredients.filter((ingredient) =>
+      ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }, [ingredients, searchTerm])
 
   if (loading) {
     return <div className="text-center text-lg">Loading ingredients...</div>
@@ -17,9 +26,9 @@ const IngredientList = () => {
   }
 
   // Paginacja
-  const totalPages = Math.ceil(ingredients.length / pageSize)
+  const totalPages = Math.ceil(filteredIngredients.length / pageSize)
   const startIndex = (currentPage - 1) * pageSize
-  const currentIngredients = ingredients.slice(startIndex, startIndex + pageSize)
+  const currentIngredients = filteredIngredients.slice(startIndex, startIndex + pageSize)
 
   const nextPage = () => {
     if (currentPage < totalPages) {
@@ -41,12 +50,20 @@ const IngredientList = () => {
     setSelectedIngredient(null)
   }
 
+  const handleFilterChange = (value) => {
+    setSearchTerm(value)
+    setCurrentPage(1)
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       {/* Wyświetl nagłówek tylko, jeśli żaden składnik nie jest wybrany */}
       {!selectedIngredient && (
         <h2 className="text-3xl font-bold text-center mb-4">Ingredient List</h2>
       )}
+
+      {/* Komponent filtra */}
+      <IngredientFilter onFilterChange={handleFilterChange} />
 
       {/* Jeśli jest wybrany składnik, wyświetlamy szczegóły */}
       {selectedIngredient ? (

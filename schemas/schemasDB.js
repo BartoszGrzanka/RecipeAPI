@@ -35,7 +35,7 @@ const ingredientSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Quantity is required'],
         min: [1, 'Quantity must be greater than or equal to 1'],
-        max: [10, 'Quantity cannot be more than 10']
+        max: [10000, 'Quantity cannot be more than 10000']
     },
     unit: {
         type: String,
