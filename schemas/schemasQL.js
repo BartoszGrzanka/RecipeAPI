@@ -73,32 +73,53 @@ var typeDefs = gql`
     }
 
     type Recipe {
+        """Unique identifier for the recipe."""
         _id: ID!
+        """Custom identifier used purely for building relationships in the database."""
         id: ID!
+        """Name of the recipe."""
         name: String!
+        """Detailed description of the recipe."""
         description: String
+        """List of ingredients IDs used in the recipe."""
         ingredients: [Ingredient!]!
+        """Step-by-step instructions for preparing the recipe."""
         instructions: [String]
+        """Time required to cook the recipe, represented as a string (e.g., '30 minutes')."""
         cookingTime: String
+        """Category of the recipe, such as 'Breakfast', 'Lunch', etc."""
         category: Category
     }
 
-    type Ingredient{
+    type Ingredient {
+        """Unique identifier for the ingredient."""
         _id: ID!
+        """Custom identifier used purely for building relationships in the database."""
         id: ID!
+        """List of recipes IDs  where this ingredient is used."""
         recipes: [Recipe]
+        """Name of the ingredient."""
         name: String!
+        """Quantity of the ingredient, represented as an integer."""
         quantity: Int!
+        """Unit of measurement for the ingredient (e.g., 'grams', 'ml')."""
         unit: Unit
+        """Associated Id of nutritional information for the ingredient."""
         nutrition: Nutrition!
     }
 
-    type Nutrition{
+    type Nutrition {
+        """Unique identifier for the nutrition entry."""
         _id: ID!
+        """Custom identifier used purely for building relationships in the database."""
         id: ID!
+        """Calorie count for the nutrition entry."""
         calories: Calories!
+        """Protein content in grams."""
         protein: ValueWithGrams!
+        """Fat content in grams."""
         fat: ValueWithGrams!
+        """Carbohydrate content in grams."""
         carbohydrates: ValueWithGrams!
     }
 
@@ -303,7 +324,7 @@ var typeDefs = gql`
         """Page number for pagination. Defaults to 1."""
         page: Int = 1
         """Number of items per page. Defaults to 10."""
-        limit: Int = 10
+        limit: Int
     }
 
     """

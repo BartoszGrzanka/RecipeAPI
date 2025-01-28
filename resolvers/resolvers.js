@@ -86,10 +86,15 @@ const resolvers = {
         }
       },
 
-      getAllNutritions: async (_, { page = 1, limit = 10 }) => {
+      getAllNutritions: async (_, { page = 1, limit = 0 }) => {
         try {
           // Paginacja
-          const skip = (page - 1) * limit;
+          let skip=0
+            if(limit <= 0){
+              limit =await Recipe.countDocuments()
+            }else{
+              skip = (page - 1) * limit
+            }
       
           // Pobieranie danych z bazy z paginacją
           const nutritions = await Nutrition.find()
@@ -108,7 +113,7 @@ const resolvers = {
       },
       
 
-      getAllRecipes: async (_, { page = 1, limit = 10, filter = {} }) => {
+      getAllRecipes: async (_, { page = 1, limit = 0, filter = {} }) => {
         try {
             const filterQuery = {}
     
@@ -133,8 +138,14 @@ const resolvers = {
                   filterQuery.description = value
               }
           }
-    
-            const skip = (page - 1) * limit
+            let skip=0
+            if(limit <= 0){
+              limit =await Recipe.countDocuments()
+            }else{
+              skip = (page - 1) * limit
+            }
+
+            //const skip = (page - 1) * limit
             const recipes = await Recipe.find(filterQuery)
                 .skip(skip)
                 .limit(limit)
@@ -169,7 +180,7 @@ const resolvers = {
             throw new Error('Failed to fetch all recipes')
         }
       },
-    getAllIngredients: async (_, { page = 1, limit = 10, filter = {} }) => {
+    getAllIngredients: async (_, { page = 1, limit = 0, filter = {} }) => {
       try {
         const filterQuery = {}
     
@@ -185,6 +196,7 @@ const resolvers = {
             filterQuery.name = { $not: { $regex: value, $options: 'i' } }
           }
         }
+        
     
         if (filter.quantity) {
           const { operator, value } = filter.quantity
@@ -207,8 +219,12 @@ const resolvers = {
         if (filter.unit) {
           filterQuery.unit = filter.unit
         }
-    
-        const skip = (page - 1) * limit
+        let skip=0
+          if(limit <= 0){
+            limit =await Recipe.countDocuments()
+          }else{
+            skip = (page - 1) * limit
+          }
     
         const ingredients = await Ingredient.find(filterQuery)
           .skip(skip)
